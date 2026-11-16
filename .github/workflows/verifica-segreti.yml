@@ -1,0 +1,61 @@
+# Verifica dei segreti dell'organizzazione App-modello.
+# Controlla solo che i segreti esistano e siano validi: non cambia nulla su Google Play.
+# Il repository è pubblico: il registro non mostra mai il contenuto dei segreti.
+name: Verifica segreti
+
+on:
+  push:
+    paths:
+      - '.github/workflows/verifica-segreti.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verifica:
+    runs-on: ubuntu-latest
+    env:
+      PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Librerie Google
+        run: pip install --quiet google-auth requests
+
+      - name: PLAY_SERVICE_ACCOUNT_JSON
+        shell: python
+        run: |
+          import json, os, sys
+          v = os.environ.get("PLAY_JSON", "")
+          out = []
+          def esito(t):
+              print(t); out.append(t)
+          if not v.strip():
+              esito("❌ PLAY_SERVICE_ACCOUNT_JSON: segreto assente o vuoto (controlla nome e accesso ai repository)")
+          else:
+              try:
+                  d = json.loads(v)
+              except Exception:
+                  esito("❌ PLAY_SERVICE_ACCOUNT_JSON: presente ma non è un JSON valido (incollato a metà?)")
+                  d = None
+              if d is not None:
+                  manca = [k for k in ("type", "client_email", "private_key", "token_uri") if not d.get(k)]
+                  if d.get("type") != "service_account" or manca:
+                      esito(f"❌ PLAY_SERVICE_ACCOUNT_JSON: JSON valido ma non è una chiave di account di servizio (mancano: {', '.join(manca) or 'type'})")
+                  else:
+                      from google.oauth2 import service_account
+                      import google.auth.transport.requests as tr
+                      try:
+                          c = service_account.Credentials.from_service_account_info(
+                              d, scopes=["https://www.googleapis.com/auth/androidpublisher"])
+                          c.refresh(tr.Request())
+                          esito("✅ PLAY_SERVICE_ACCOUNT_JSON: presente, valido e accettato da Google")
+                      except Exception as e:
+                          esito(f"❌ PLAY_SERVICE_ACCOUNT_JSON: Google rifiuta la chiave ({type(e).__name__}): forse è stata revocata")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("### Verifica segreti\n" + "\n".join(out) + "\n")
+          if any(t.startswith("❌") for t in out):
+              sys.exit(1)
