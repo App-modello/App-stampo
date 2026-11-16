@@ -14,8 +14,18 @@ Questo repository è lo **stampo** da cui nascono le app di prenotazione per neg
 - Se non fa niente, prima chiedi: spesso vuole solo informazioni ("rispondimi solo, non fare nulla").
 
 ## Com'è fatto
-- **Sito = app**: `index.html`, `app.js`, `seed.js`, `icone.js` nella cartella principale.
+Un solo repository per negozio, con app dei clienti e gestionale del titolare (Radici invece ne ha due:
+`Radici-app/Radici` per l'app e `Radici-app/Radici-app` per il gestionale).
+- **App dei clienti = sito**: `index.html`, `app.js`, `seed.js`, `icone.js` nella cartella principale.
   L'app Android/iPhone (cartella `app-android/`, Capacitor) racchiude gli stessi file.
+- **Gestionale del titolare**: cartella `gestionale/` (`index.html`, `dash.js`). Usa gli stessi
+  `../config.js`, `../seed.js`, `../icone.js` dell'app. Non entra nelle app Android/iPhone.
+  Per entrare serve un account Firebase (email e password) e il documento `saloni/<salone>/admin/<UID>`
+  creato a mano nella console di Firestore (UID da Authentication → Utenti).
+- **`firestore.rules`**: regole di sicurezza di Firestore, da incollare in Firebase → Firestore → Regole.
+- **Sito pubblicato (GitHub Pages, ramo `main`, cartella root)**: app in `https://<org>.github.io/<repo>/`,
+  gestionale in `…/<repo>/gestionale/`, pagine legali `privacy.html`, `termini.html`, `cancella-account.html`.
+  In Firebase → Authentication → Impostazioni → Domini autorizzati va aggiunto `<org>.github.io`.
 - **`config.js`**: l'UNICO file con le impostazioni dell'app (nome, pacchetto, codice negozio,
   colori, Firebase, repository). Lo leggono il sito e le pagine legali mentre girano.
 - **`app-android/personalizza.js`**: copia `config.js` nei progetti Android/iPhone, nel manifest e
@@ -54,12 +64,14 @@ per i repository pubblici). Nello stampo per ora `PLAY_SERVICE_ACCOUNT_JSON` è 
 2. Compila `config.js` (nome, sottotitolo, pacchetto, salone, colori, repository, sito, apk, firebase).
 3. Firebase (lo fa il titolare, guidato): progetto, app Web/Android/iOS, file `google-services.json`
    (in `app-android/android/app/`) e `GoogleService-Info.plist` (in `app-android/ios/App/App/`),
-   accesso email/Google/Apple, regole Firestore, impronte SHA della firma.
+   accesso email/Google/Apple, regole Firestore (`firestore.rules`), dominio `<org>.github.io` autorizzato,
+   account del titolare + documento `saloni/<salone>/admin/<UID>`, impronte SHA della firma.
 4. Logo in `logo.png` → `python3 app-android/crea-icone.py`; poi `node app-android/personalizza.js`.
 5. Firma: il titolare inserisce il segreto `FIRMA_PASSWORD` (password lunga, salvata da lui); la chiave la crea la fabbrica da sola alla prima compilazione da `main`. Le impronte SHA (riepilogo della compilazione) vanno poi aggiunte in Firebase.
 6. Google Play: il titolare crea l'app in Play Console e dà il permesso all'account di servizio;
    poi "carica-test-interno" / "promuovi-produzione" solo su sua richiesta.
-7. Apple: quando l'account Apple Developer sarà attivo (guida passo passo, da preparare).
+7. Sito: Settings → Pages → Deploy from a branch → `main` / root (pagine legali per gli store e gestionale).
+8. Apple: quando l'account Apple Developer sarà attivo (guida passo passo, da preparare).
 
 ## Stato (aggiornare quando cambia)
 - Stampo: prima versione sul ramo di lavoro, non ancora pubblicata su `main`.
