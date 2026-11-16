@@ -3,10 +3,13 @@
 #              Solo dal ramo main e solo con la firma vera finisce nella pagina "Releases".
 #  - "store":  l'AAB per Google Play, senza aggiornamento automatico. Si scarica dagli artifact
 #              della compilazione ("aab-per-Google-Play") oppure lo carica la fabbrica "Google Play".
-# Firma: la chiave NON sta nel repository. Servono due segreti:
-#  - FIRMA_P12_BASE64: il file della chiave (.p12) trasformato in testo base64
-#  - FIRMA_PASSWORD:   la sua password (alias della chiave: "app", oppure il segreto FIRMA_ALIAS)
-# Senza segreti l'app si compila lo stesso con una firma di prova: va bene per verificare, non per pubblicare.
+# Firma (come in Radici): basta il segreto FIRMA_PASSWORD, una password LUNGA (almeno 16 caratteri) inventata dal titolare.
+#  - Alla prima compilazione dal ramo main la fabbrica crea la chiave app-android/firma-app.p12, cifrata con quella
+#    password, e la salva nel repository. Da lì in poi usa sempre quella. NON cancellarla: senza, l'APK installato
+#    non si aggiorna più. Il repository è pubblico: la sicurezza sta tutta nella password, che non va mai persa.
+#  - In alternativa la chiave può stare in un segreto (FIRMA_P12_BASE64, il .p12 in base64): ha la precedenza sul file.
+#  - Alias della chiave: "app" (oppure il segreto FIRMA_ALIAS).
+# Senza FIRMA_PASSWORD l'app si compila lo stesso con una firma di prova: va bene per verificare, non per pubblicare.
 name: App Android
 
 on:
@@ -50,16 +53,38 @@ jobs:
           node app-android/personalizza.js
           node -e "global.window={};require('./config.js');const A=window.APP;console.log('APK='+A.apk+'\nNOME_APP='+A.nome)" >> "$GITHUB_ENV"
 
-      - name: Chiave di firma (dai segreti)
+      - name: Crea la chiave di firma (solo la prima volta, dal ramo main)
+        if: env.FIRMA_PASSWORD != '' && env.FIRMA_P12_BASE64 == '' && github.ref == 'refs/heads/main'
         run: |
-          if [ -n "$FIRMA_P12_BASE64" ] && [ -n "$FIRMA_PASSWORD" ]; then
+          if [ ! -f app-android/firma-app.p12 ]; then
+            if [ ${#FIRMA_PASSWORD} -lt 16 ]; then
+              echo "::error::La password FIRMA_PASSWORD è troppo corta (${#FIRMA_PASSWORD} caratteri): ne servono almeno 16, perché la chiave cifrata sta in un repository pubblico."
+              exit 1
+            fi
+            keytool -genkeypair -storetype PKCS12 -keystore app-android/firma-app.p12 -alias "${FIRMA_ALIAS:-app}" \
+              -keyalg RSA -keysize 3072 -validity 10000 \
+              -storepass "$FIRMA_PASSWORD" -keypass "$FIRMA_PASSWORD" \
+              -dname "CN=$NOME_APP, O=$NOME_APP, C=IT"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -f app-android/firma-app.p12
+            git commit -m "Chiave di firma dell'app, cifrata con la password segreta [skip ci]"
+            git push
+            echo "### Creata la chiave di firma dell'app (app-android/firma-app.p12). Non cancellarla e non perdere la password." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Chiave di firma
+        run: |
+          if [ -n "$FIRMA_P12_BASE64" ]; then
             printf '%s' "$FIRMA_P12_BASE64" | base64 -d > app-android/firma-app.p12
+          fi
+          if [ -n "$FIRMA_PASSWORD" ] && [ -f app-android/firma-app.p12 ]; then
             keytool -list -v -keystore app-android/firma-app.p12 -storetype PKCS12 -storepass "$FIRMA_PASSWORD" | grep -E "Alias|SHA1:|SHA256:" | tee impronte.txt
             { echo "### Impronte della firma (servono a Firebase per l'accesso con Google)"; echo '```'; cat impronte.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
             echo "FIRMATA=1" >> "$GITHUB_ENV"
           else
-            echo "::warning::Mancano i segreti FIRMA_P12_BASE64 e FIRMA_PASSWORD: compilo con la firma di prova (solo verifica, niente Releases)."
-            echo "### Compilata con la firma di prova (mancano i segreti della firma): solo per verifica" >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Manca il segreto FIRMA_PASSWORD (o la chiave non è ancora stata creata dal ramo main): compilo con la firma di prova (solo verifica, niente Releases)."
+            echo "### Compilata con la firma di prova: solo per verifica" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: File di Firebase per Android (google-services.json)
@@ -126,7 +151,3 @@ jobs:
             Scarica ${{ env.APK }} dal telefono e installalo.
           files: ${{ env.APK }}
           make_latest: true
-
-      - name: Cancella la chiave dal computer di GitHub
-        if: always()
-        run: rm -f app-android/firma-app.p12

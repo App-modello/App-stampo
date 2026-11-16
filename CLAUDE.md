@@ -34,7 +34,7 @@ Questo repository è lo **stampo** da cui nascono le app di prenotazione per neg
 ## Fabbriche (GitHub Actions)
 | Fabbrica | File | Cosa fa |
 |---|---|---|
-| App Android | `android.yml` | APK (con aggiornamento automatico) + AAB per Google Play. Firma dai segreti; senza segreti firma di prova. Pubblica in Releases solo da `main` con firma vera. |
+| App Android | `android.yml` | APK (con aggiornamento automatico) + AAB per Google Play. Alla prima compilazione da `main` crea la chiave di firma (come Radici); senza password firma di prova. Pubblica in Releases solo da `main` con firma vera. |
 | App iPhone | `ios.yml` | Compilazione di verifica non firmata; con i 4 segreti Apple e dal ramo `main` firma e carica su TestFlight. |
 | Google Play | `google-play.yml` | Manuale: `stato`, `carica-test-interno`, `promuovi-produzione`. |
 | Verifica segreti | `verifica-segreti.yml` | Controlla che i segreti ci siano e siano validi, senza cambiare nulla. |
@@ -43,7 +43,7 @@ Questo repository è lo **stampo** da cui nascono le app di prenotazione per neg
 | Segreto | A cosa serve | Note |
 |---|---|---|
 | `PLAY_SERVICE_ACCOUNT_JSON` | Google Play | Stesso account di servizio per tutte le app; in Play Console va dato il permesso su ogni app. |
-| `FIRMA_P12_BASE64`, `FIRMA_PASSWORD` (`FIRMA_ALIAS` facoltativo, predefinito `app`) | Firma Android | **Una chiave diversa per ogni app.** La chiave non va mai nel repository. |
+| `FIRMA_PASSWORD` (`FIRMA_ALIAS` facoltativo, predefinito `app`) | Firma Android | **Una chiave diversa per ogni app**, come in Radici: il titolare inventa una password lunga (almeno 16 caratteri, la fabbrica rifiuta quelle corte) e la salva; alla prima compilazione da `main` la fabbrica crea `app-android/firma-app.p12` cifrato e lo salva nel repository. Mai cancellare quel file né il segreto. In alternativa la chiave può stare nel segreto `FIRMA_P12_BASE64`. |
 | `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APPSTORE_API_KEY_P8`, `APPLE_TEAM_ID` | Apple | Uguali per tutte le app dello stesso account Apple Developer. Non ancora creati. |
 
 I segreti di un'organizzazione GitHub valgono per tutti i suoi repository (con GitHub gratuito solo
@@ -56,7 +56,7 @@ per i repository pubblici). Nello stampo per ora `PLAY_SERVICE_ACCOUNT_JSON` è 
    (in `app-android/android/app/`) e `GoogleService-Info.plist` (in `app-android/ios/App/App/`),
    accesso email/Google/Apple, regole Firestore, impronte SHA della firma.
 4. Logo in `logo.png` → `python3 app-android/crea-icone.py`; poi `node app-android/personalizza.js`.
-5. Chiave di firma nuova → segreti `FIRMA_P12_BASE64` e `FIRMA_PASSWORD` (password lunga, salvata dal titolare).
+5. Firma: il titolare inserisce il segreto `FIRMA_PASSWORD` (password lunga, salvata da lui); la chiave la crea la fabbrica da sola alla prima compilazione da `main`. Le impronte SHA (riepilogo della compilazione) vanno poi aggiunte in Firebase.
 6. Google Play: il titolare crea l'app in Play Console e dà il permesso all'account di servizio;
    poi "carica-test-interno" / "promuovi-produzione" solo su sua richiesta.
 7. Apple: quando l'account Apple Developer sarà attivo (guida passo passo, da preparare).

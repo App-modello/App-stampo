@@ -17,8 +17,8 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
-    // Firma: la fabbrica ricrea ../../firma-app.p12 dal segreto GitHub FIRMA_P12_BASE64 (il file NON sta nel repository)
-    // e passa la password dal segreto FIRMA_PASSWORD. Senza segreti l'app si compila con la firma di prova (solo per verifica).
+    // Firma: chiave cifrata ../../firma-app.p12 (creata dalla fabbrica alla prima compilazione su main),
+    // password nel segreto GitHub FIRMA_PASSWORD. Senza l'app si compila con la firma di prova (solo per verifica).
     def pw = System.getenv("FIRMA_PASSWORD")
     def chiave = file("../../firma-app.p12")
     if (!chiave.exists()) pw = null

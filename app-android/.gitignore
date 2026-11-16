@@ -1,6 +1,4 @@
 node_modules/
 www/
 *.apk
-firma-app.p12
-*.p12
 *.jks
