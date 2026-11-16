@@ -123,7 +123,16 @@ jobs:
                           ", ".join(r.get("versionCodes", [])) or "–",
                           stati.get(r.get("status", ""), r.get("status", "–")), f"{q:.0%}" if q else "–"))
 
-          edit = ed.insert(packageName=pkg, body={}).execute()["id"]
+          from googleapiclient.errors import HttpError
+          try:
+              edit = ed.insert(packageName=pkg, body={}).execute()["id"]
+          except HttpError as e:
+              if e.resp.status not in (403, 404): raise
+              scrivi(f"### L'app {pkg} non si trova su Google Play")
+              scrivi("O non è ancora stata creata in Play Console, o l'account di servizio non ha il permesso su questa app")
+              scrivi("(Play Console → Utenti e autorizzazioni → account di servizio → Autorizzazioni app).")
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f: f.write("\n".join(riepilogo) + "\n")
+              sys.exit(0 if azione == "stato" else 1)
           committed = False
           try:
               if azione == "carica-test-interno":
