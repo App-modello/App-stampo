@@ -1,0 +1,132 @@
+# Compila l'app Android a ogni modifica del sito o dell'app (su qualsiasi ramo, per verifica).
+#  - "github": l'APK con aggiornamento automatico (nome del file: APP.apk in config.js).
+#              Solo dal ramo main e solo con la firma vera finisce nella pagina "Releases".
+#  - "store":  l'AAB per Google Play, senza aggiornamento automatico. Si scarica dagli artifact
+#              della compilazione ("aab-per-Google-Play") oppure lo carica la fabbrica "Google Play".
+# Firma: la chiave NON sta nel repository. Servono due segreti:
+#  - FIRMA_P12_BASE64: il file della chiave (.p12) trasformato in testo base64
+#  - FIRMA_PASSWORD:   la sua password (alias della chiave: "app", oppure il segreto FIRMA_ALIAS)
+# Senza segreti l'app si compila lo stesso con una firma di prova: va bene per verificare, non per pubblicare.
+name: App Android
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'config.js'
+      - 'app.js'
+      - 'seed.js'
+      - 'icone.js'
+      - 'manifest.webmanifest'
+      - '*.png'
+      - 'app-android/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      FIRMA_P12_BASE64: ${{ secrets.FIRMA_P12_BASE64 }}
+      FIRMA_PASSWORD: ${{ secrets.FIRMA_PASSWORD }}
+      FIRMA_ALIAS: ${{ secrets.FIRMA_ALIAS }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Leggi le impostazioni (config.js) e applicale al progetto
+        run: |
+          node app-android/personalizza.js
+          node -e "global.window={};require('./config.js');const A=window.APP;console.log('APK='+A.apk+'\nNOME_APP='+A.nome)" >> "$GITHUB_ENV"
+
+      - name: Chiave di firma (dai segreti)
+        run: |
+          if [ -n "$FIRMA_P12_BASE64" ] && [ -n "$FIRMA_PASSWORD" ]; then
+            printf '%s' "$FIRMA_P12_BASE64" | base64 -d > app-android/firma-app.p12
+            keytool -list -v -keystore app-android/firma-app.p12 -storetype PKCS12 -storepass "$FIRMA_PASSWORD" | grep -E "Alias|SHA1:|SHA256:" | tee impronte.txt
+            { echo "### Impronte della firma (servono a Firebase per l'accesso con Google)"; echo '```'; cat impronte.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            echo "FIRMATA=1" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Mancano i segreti FIRMA_P12_BASE64 e FIRMA_PASSWORD: compilo con la firma di prova (solo verifica, niente Releases)."
+            echo "### Compilata con la firma di prova (mancano i segreti della firma): solo per verifica" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: File di Firebase per Android (google-services.json)
+        run: |
+          if [ ! -f app-android/android/app/google-services.json ]; then
+            echo "::warning::Manca app-android/android/app/google-services.json: l'app si compila ma l'accesso con Google e le notifiche non funzioneranno."
+          fi
+
+      - name: Prepara l'app (copia il sito dentro l'app)
+        working-directory: app-android
+        run: |
+          npm ci --no-audit --no-fund
+          node copia-web.js
+          npx cap sync android
+
+      - name: Compila l'APK (GitHub) e l'AAB (Google Play)
+        working-directory: app-android/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleGithubRelease bundleStoreRelease --no-daemon --stacktrace
+          cp app/build/outputs/apk/github/release/app-github-release.apk "$GITHUB_WORKSPACE/$APK"
+          cp app/build/outputs/bundle/storeRelease/app-store-release.aab "$GITHUB_WORKSPACE/app-store.aab"
+
+      - name: Controlla che la versione per Google Play non abbia l'aggiornamento automatico
+        working-directory: app-android/android/app/build
+        run: |
+          m=$(find intermediates -path '*storeRelease*' -name AndroidManifest.xml | grep -i merged | head -1)
+          echo "Manifest controllato: $m"
+          test -n "$m"
+          if grep -q REQUEST_INSTALL_PACKAGES "$m" || grep -q fileprovider "$m"; then echo "ERRORE: la versione store contiene l'aggiornamento automatico"; exit 1; fi
+          if unzip -p "$GITHUB_WORKSPACE/app-store.aab" 'base/dex/*.dex' | grep -a -q 'Lapp/stampo/AggiornaPlugin;'; then echo "ERRORE: AggiornaPlugin nella versione store"; exit 1; fi
+          unzip -p "$GITHUB_WORKSPACE/$APK" '*.dex' | grep -a -q 'Lapp/stampo/AggiornaPlugin;' || { echo "ERRORE: manca AggiornaPlugin nell'APK di GitHub"; exit 1; }
+          echo "OK: niente permesso di installazione, niente FileProvider, niente AggiornaPlugin"
+          { echo "### Versione per Google Play"; echo "versionCode ${{ github.run_number }}, versionName 1.${{ github.run_number }}"; echo "Scarica l'artifact **aab-per-Google-Play** oppure usa la fabbrica \"Google Play\"."; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Salva l'APK tra i file della compilazione
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: ${{ env.APK }}
+
+      - name: Salva l'AAB per Google Play tra i file della compilazione
+        uses: actions/upload-artifact@v4
+        with:
+          name: aab-per-Google-Play
+          path: app-store.aab
+          retention-days: 90
+
+      - name: Salva il file di deoffuscamento (mapping.txt) per Google Play
+        uses: actions/upload-artifact@v4
+        with:
+          name: mapping-per-Google-Play
+          path: app-android/android/app/build/outputs/mapping/storeRelease/mapping.txt
+          retention-days: 90
+
+      - name: Pubblica l'APK firmato in Releases
+        if: env.FIRMATA == '1' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: app-v1.${{ github.run_number }}
+          name: App Android 1.${{ github.run_number }}
+          body: |
+            App Android di ${{ env.NOME_APP }}, versione 1.${{ github.run_number }}.
+            Scarica ${{ env.APK }} dal telefono e installalo.
+          files: ${{ env.APK }}
+          make_latest: true
+
+      - name: Cancella la chiave dal computer di GitHub
+        if: always()
+        run: rm -f app-android/firma-app.p12

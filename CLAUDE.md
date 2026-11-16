@@ -1,0 +1,69 @@
+# App-stampo – istruzioni per Claude
+
+Questo repository è lo **stampo** da cui nascono le app di prenotazione per negozi
+(parrucchieri, estetiste, barbieri…) del servizio Radix Salon di Eurogestion.
+È nato da Radici (`Radici-app/Radici`), la prima app in produzione.
+
+## Regole di lavoro (decise dal titolare)
+- Rispondi **in italiano**, **passo passo**, con parole semplici: il titolare non è un programmatore.
+  Un passo alla volta quando deve fare lui qualcosa (clic esatti, poi aspetta "fatto").
+- Lavora sempre su un **ramo di lavoro**; su `main` si pubblica **solo quando dice "pubblica"**.
+- **Google Play**: usa la fabbrica "Google Play" in Actions. L'azione `stato` si può usare sempre;
+  `carica-test-interno` e `promuovi-produzione` **solo se lo chiede lui**.
+- Non mettere mai segreti, password o chiavi nel repository (è pubblico).
+- Se non fa niente, prima chiedi: spesso vuole solo informazioni ("rispondimi solo, non fare nulla").
+
+## Com'è fatto
+- **Sito = app**: `index.html`, `app.js`, `seed.js`, `icone.js` nella cartella principale.
+  L'app Android/iPhone (cartella `app-android/`, Capacitor) racchiude gli stessi file.
+- **`config.js`**: l'UNICO file con le impostazioni dell'app (nome, pacchetto, codice negozio,
+  colori, Firebase, repository). Lo leggono il sito e le pagine legali mentre girano.
+- **`app-android/personalizza.js`**: copia `config.js` nei progetti Android/iPhone, nel manifest e
+  nell'intestazione di `index.html`. Le fabbriche lo lanciano da sole; lancialo anche tu
+  (`node app-android/personalizza.js`) dopo aver cambiato `config.js` e fai il commit dei file cambiati.
+- **`app-android/crea-icone.py`**: crea tutte le icone da `logo.png` (1024×1024) nella cartella
+  principale; senza logo fa un'icona provvisoria con l'iniziale.
+- **Dati del negozio** (servizi, orari, staff, testi legali, fidelity, avvisi): NON stanno nel codice.
+  Li imposta il titolare del negozio dal **gestionale** e arrivano da Firebase, documento
+  `saloni/<APP.salone>`. `seed.js` contiene solo valori di partenza d'esempio e i testi legali standard
+  (con segnaposto `{{...}}`). Eurogestion è indicata nei testi legali come responsabile del trattamento:
+  è corretto per tutte le app.
+- Il pacchetto Java interno è fisso (`app.stampo`, namespace in `build.gradle`): l'identificativo vero
+  negli store è `applicationId`, che arriva da `config.js`. Non rinominare le cartelle Java.
+
+## Fabbriche (GitHub Actions)
+| Fabbrica | File | Cosa fa |
+|---|---|---|
+| App Android | `android.yml` | APK (con aggiornamento automatico) + AAB per Google Play. Firma dai segreti; senza segreti firma di prova. Pubblica in Releases solo da `main` con firma vera. |
+| App iPhone | `ios.yml` | Compilazione di verifica non firmata; con i 4 segreti Apple e dal ramo `main` firma e carica su TestFlight. |
+| Google Play | `google-play.yml` | Manuale: `stato`, `carica-test-interno`, `promuovi-produzione`. |
+| Verifica segreti | `verifica-segreti.yml` | Controlla che i segreti ci siano e siano validi, senza cambiare nulla. |
+
+## Segreti GitHub (Settings → Secrets and variables → Actions)
+| Segreto | A cosa serve | Note |
+|---|---|---|
+| `PLAY_SERVICE_ACCOUNT_JSON` | Google Play | Stesso account di servizio per tutte le app; in Play Console va dato il permesso su ogni app. |
+| `FIRMA_P12_BASE64`, `FIRMA_PASSWORD` (`FIRMA_ALIAS` facoltativo, predefinito `app`) | Firma Android | **Una chiave diversa per ogni app.** La chiave non va mai nel repository. |
+| `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APPSTORE_API_KEY_P8`, `APPLE_TEAM_ID` | Apple | Uguali per tutte le app dello stesso account Apple Developer. Non ancora creati. |
+
+I segreti di un'organizzazione GitHub valgono per tutti i suoi repository (con GitHub gratuito solo
+per i repository pubblici). Nello stampo per ora `PLAY_SERVICE_ACCOUNT_JSON` è un segreto **del repository**.
+
+## Creare una nuova app (procedura attuale, la fabbrica "Nuova app" è ancora da fare)
+1. Il titolare crea il repository nuovo (pubblico) e lo dà a Claude; Claude ci copia lo stampo.
+2. Compila `config.js` (nome, sottotitolo, pacchetto, salone, colori, repository, sito, apk, firebase).
+3. Firebase (lo fa il titolare, guidato): progetto, app Web/Android/iOS, file `google-services.json`
+   (in `app-android/android/app/`) e `GoogleService-Info.plist` (in `app-android/ios/App/App/`),
+   accesso email/Google/Apple, regole Firestore, impronte SHA della firma.
+4. Logo in `logo.png` → `python3 app-android/crea-icone.py`; poi `node app-android/personalizza.js`.
+5. Chiave di firma nuova → segreti `FIRMA_P12_BASE64` e `FIRMA_PASSWORD` (password lunga, salvata dal titolare).
+6. Google Play: il titolare crea l'app in Play Console e dà il permesso all'account di servizio;
+   poi "carica-test-interno" / "promuovi-produzione" solo su sua richiesta.
+7. Apple: quando l'account Apple Developer sarà attivo (guida passo passo, da preparare).
+
+## Stato (aggiornare quando cambia)
+- Stampo: prima versione sul ramo di lavoro, non ancora pubblicata su `main`.
+- Da fare: fabbrica "Nuova app", guide per gli store (schede Google Play/App Store) in versione generica,
+  segreti a livello di organizzazione, account Apple Developer.
+- Quando si corregge qualcosa in Radici che vale per tutte le app, riportarlo anche qui (e viceversa):
+  i file sono volutamente quasi identici.

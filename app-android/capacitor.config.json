@@ -1,0 +1,53 @@
+{
+  "appId": "it.appmodello.prenota",
+  "appName": "Nome App",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#6E7A3C"
+  },
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "css"
+    },
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": [
+        "google.com",
+        "apple.com"
+      ]
+    },
+    "FirebaseMessaging": {
+      "presentationOptions": [
+        "alert",
+        "badge",
+        "sound"
+      ]
+    }
+  },
+  "ios": {
+    "backgroundColor": "#6E7A3C",
+    "contentInset": "never",
+    "scheme": "App"
+  },
+  "experimental": {
+    "ios": {
+      "spm": {
+        "swiftToolsVersion": "6.1",
+        "packageTraits": {
+          "@capacitor-firebase/authentication": [
+            "Google"
+          ]
+        },
+        "packageOptions": {
+          "@capacitor-firebase/authentication": {
+            "symlink": true
+          },
+          "@capacitor-firebase/messaging": {
+            "symlink": true
+          }
+        }
+      }
+    }
+  }
+}
