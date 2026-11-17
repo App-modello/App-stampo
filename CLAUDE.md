@@ -38,6 +38,13 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   `saloni/<APP.salone>`. `seed.js` contiene solo valori di partenza d'esempio e i testi legali standard
   (con segnaposto `{{...}}`). Eurogestion è indicata nei testi legali come responsabile del trattamento:
   è corretto per tutte le app.
+- **Notifiche push**: `functions/` è il programma per Firebase Cloud Functions che le invia (promemoria ogni
+  5 minuti, comunicazioni, punti Fidelity, clienti inattivi alle 10, orario di silenzio con coda in
+  `saloni/<salone>/coda`). Usa `seed.js` (copiato dalla fabbrica) per valori di partenza, testi e saldo punti.
+  Calcoli in `functions/logica.js`, prove con `node functions/prova.js`.
+  L'interruttore è nel **gestionale → Notifiche push → "Invio notifiche attivo"** (`notifiche.attive` nel
+  documento del negozio): l'app lo legge da Firebase, quindi si accendono **senza aggiornare l'app**.
+  Accenderlo solo dopo aver installato il programma (piano Blaze). Su iPhone serve anche la chiave APNs in Firebase.
 - Il pacchetto Java interno è fisso (`app.stampo`, namespace in `build.gradle`): l'identificativo vero
   negli store è `applicationId`, che arriva da `config.js`. Non rinominare le cartelle Java.
 
@@ -48,12 +55,15 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
 | App iPhone | `ios.yml` | Compilazione di verifica non firmata; con i 4 segreti Apple e dal ramo `main` firma e carica su TestFlight. |
 | Google Play | `google-play.yml` | Manuale: `stato`, `carica-test-interno`, `promuovi-produzione`. |
 | Verifica segreti | `verifica-segreti.yml` | Controlla che i segreti ci siano e siano validi, senza cambiare nulla. |
+| Notifiche Firebase | `notifiche-firebase.yml` | `prova` (automatica quando cambia `functions/`, non installa nulla) e `installa` (solo a mano, solo da `main`, solo su richiesta del titolare): installa il programma delle notifiche sul progetto Firebase di `config.js`. |
+| Verifica Firebase | `verifica-firebase.yml` | Controlla la chiave `FIREBASE_SERVICE_ACCOUNT_JSON` e i suoi permessi, senza cambiare nulla. |
 
 ## Segreti GitHub (Settings → Secrets and variables → Actions)
 | Segreto | A cosa serve | Note |
 |---|---|---|
 | `PLAY_SERVICE_ACCOUNT_JSON` | Google Play | Stesso account di servizio per tutte le app; in Play Console va dato il permesso su ogni app. |
 | `FIRMA_PASSWORD` (`FIRMA_ALIAS` facoltativo, predefinito `app`) | Firma Android | **Una chiave diversa per ogni app**, come in Radici: il titolare inventa una password lunga (almeno 16 caratteri, la fabbrica rifiuta quelle corte) e la salva; alla prima compilazione da `main` la fabbrica crea `app-android/firma-app.p12` cifrato e lo salva nel repository. Mai cancellare quel file né il segreto. In alternativa la chiave può stare nel segreto `FIRMA_P12_BASE64`. |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Installare il programma delle notifiche | Account di servizio (es. `fabbrica-firebase`) con i ruoli **Editor**, **Service Account User** e **Cloud Functions Admin** sul progetto Firebase. Uno per account Google: si crea una volta e si invita (IAM) negli altri progetti. Radici ne ha uno suo (progetto `radici-app`). |
 | `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APPSTORE_API_KEY_P8`, `APPLE_TEAM_ID` | Apple | Uguali per tutte le app dello stesso account Apple Developer. Non ancora creati. |
 
 I segreti di un'organizzazione GitHub valgono per tutti i suoi repository (con GitHub gratuito solo
@@ -72,6 +82,9 @@ per i repository pubblici). Nello stampo per ora `PLAY_SERVICE_ACCOUNT_JSON` è 
    poi "carica-test-interno" / "promuovi-produzione" solo su sua richiesta.
 7. Sito: Settings → Pages → Deploy from a branch → `main` / root (pagine legali per gli store e gestionale).
 8. Apple: quando l'account Apple Developer sarà attivo (guida passo passo, da preparare).
+9. Notifiche (quando le vuole il titolare): piano Blaze sul progetto Firebase con avviso di spesa, segreto
+   `FIREBASE_SERVICE_ACCOUNT_JSON`, fabbrica "Notifiche Firebase" → `installa` (da `main`), poi nel gestionale
+   accendere "Invio notifiche attivo". Per gli iPhone: chiave APNs in Firebase → Cloud Messaging.
 
 ## Stato (aggiornare quando cambia)
 - Stampo: prima versione sul ramo di lavoro, non ancora pubblicata su `main`.
