@@ -4,9 +4,6 @@
 name: Verifica Firebase
 
 on:
-  push:
-    paths:
-      - '.github/workflows/verifica-firebase.yml'
   workflow_dispatch:
 
 permissions:
