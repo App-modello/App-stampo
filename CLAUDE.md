@@ -67,7 +67,9 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
 | `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APPSTORE_API_KEY_P8`, `APPLE_TEAM_ID` | Apple | Uguali per tutte le app dello stesso account Apple Developer. Non ancora creati. |
 
 I segreti di un'organizzazione GitHub valgono per tutti i suoi repository (con GitHub gratuito solo
-per i repository pubblici). Nello stampo per ora `PLAY_SERVICE_ACCOUNT_JSON` è un segreto **del repository**.
+per i repository pubblici). `PLAY_SERVICE_ACCOUNT_JSON` è un segreto **dell'organizzazione** (App-modello),
+verificato con la fabbrica "Verifica segreti": non va rimesso nei singoli repository (un segreto del repository
+con lo stesso nome prevale su quello dell'organizzazione). `FIRMA_PASSWORD` resta invece **del singolo repository**.
 
 ## Creare una nuova app (procedura attuale, la fabbrica "Nuova app" è ancora da fare)
 1. Il titolare crea il repository nuovo (pubblico) e lo dà a Claude; Claude ci copia lo stampo.
@@ -87,8 +89,9 @@ per i repository pubblici). Nello stampo per ora `PLAY_SERVICE_ACCOUNT_JSON` è 
    accendere "Invio notifiche attivo". Per gli iPhone: chiave APNs in Firebase → Cloud Messaging.
 
 ## Stato (aggiornare quando cambia)
-- Stampo: prima versione sul ramo di lavoro, non ancora pubblicata su `main`.
+- Stampo: pubblicato su `main`.
+- Segreti a livello di organizzazione: fatto (`PLAY_SERVICE_ACCOUNT_JSON`).
 - Da fare: fabbrica "Nuova app", guide per gli store (schede Google Play/App Store) in versione generica,
-  segreti a livello di organizzazione, account Apple Developer.
+  account Apple Developer.
 - Quando si corregge qualcosa in Radici che vale per tutte le app, riportarlo anche qui (e viceversa):
   i file sono volutamente quasi identici.
