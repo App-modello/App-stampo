@@ -427,7 +427,7 @@ window.ricresciRadici = function (el) { if (!el || !el.classList.contains('vivo'
 </div></div>
 
 <script>/* link alle pagine legali pubblicate sul sito (dall'app servono indirizzi completi) */
-document.querySelectorAll('a[data-sito]').forEach(function (a) { if (window.APP && APP.sito) a.href = APP.sito + a.dataset.sito; });</script>
+document.querySelectorAll('a[data-sito]').forEach(function (a) { if (window.APP && (APP.sitoStore || APP.sito)) a.href = (APP.sitoStore || APP.sito) + a.dataset.sito; });</script>
 <script src="seed.js"></script>
 <script src="icone.js"></script>
 <script type="module" src="app.js"></script>

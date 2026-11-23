@@ -62,7 +62,7 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   `Radixsalon-sito` con `python3 crea-pagina-app.py <cartella-app> <nome> "<Nome app>"` (copia privacy.html,
   termini.html, cancella-account.html, seed.js, config.js e le adatta; leggono gli stessi dati Firestore dell'app,
   quindi i testi si aggiornano da soli; rigenerare se cambiano seed.js o le pagine dell'app). Poi impostare
-  `sitoStore` in `config.js` con quell'indirizzo base e pubblicare il sito (`main`). Il link dipende dal dominio
+  `sitoStore` in `config.js` con quell'indirizzo base (lo usano il gestionale e i tasti "Apri la versione web" dell'app) e pubblicare il sito (`main`). Il link dipende dal dominio
   eurogestionradix.it: rinnovo automatico acceso.
 - Il pacchetto Java interno è fisso (`app.stampo`, namespace in `build.gradle`): l'identificativo vero
   negli store è `applicationId`, che arriva da `config.js`. Non rinominare le cartelle Java.
