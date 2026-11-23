@@ -38,6 +38,10 @@ window.APP = {
   repository: 'App-modello/App-stampo',
   /* Indirizzo del sito pubblicato (GitHub Pages), con la barra finale: serve per i link a privacy e termini */
   sito: 'https://app-modello.github.io/App-stampo/',
+  /* Indirizzo delle pagine legali PER GLI STORE, sul sito di Eurogestion (lo sviluppatore): privacy, termini e cancellazione account.
+     Si creano con crea-pagina-app.py nel repository Radixsalon-sito. Lascia vuoto per usare 'sito' qui sopra. */
+  sitoStore: '',  // es. 'https://eurogestionradix.it/app/nomeapp/'
+
   /* Nome del file APK pubblicato nelle Releases (senza spazi) */
   apk: 'App.apk',
 

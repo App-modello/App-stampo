@@ -53,6 +53,14 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   Documenti per i saloni e privacy della piattaforma sono sul sito eurogestionradix.it (repository
   `Radixsalon-sito`: `condizioni.html`, `privacy.html`). **Sono bozze di partenza: farli rivedere da un professionista.**
   L'Ordine deve prevedere l'autorizzazione del salone alla pubblicazione negli store a suo nome e l'approvazione specifica delle clausole (art. 10 delle condizioni).
+- **Pagine legali per gli store**: lo sviluppatore negli store è Eurogestion, quindi per Google Play e App Store
+  l'indirizzo di privacy, termini e cancellazione account è una pagina sul sito di Eurogestion che indica
+  Eurogestion come sviluppatore: `https://eurogestionradix.it/app/<nome>/privacy.html`. Si crea dal repository
+  `Radixsalon-sito` con `python3 crea-pagina-app.py <cartella-app> <nome> "<Nome app>"` (copia privacy.html,
+  termini.html, cancella-account.html, seed.js, config.js e le adatta; leggono gli stessi dati Firestore dell'app,
+  quindi i testi si aggiornano da soli; rigenerare se cambiano seed.js o le pagine dell'app). Poi impostare
+  `sitoStore` in `config.js` con quell'indirizzo base e pubblicare il sito (`main`). Il link dipende dal dominio
+  eurogestionradix.it: rinnovo automatico acceso.
 - Il pacchetto Java interno è fisso (`app.stampo`, namespace in `build.gradle`): l'identificativo vero
   negli store è `applicationId`, che arriva da `config.js`. Non rinominare le cartelle Java.
 
