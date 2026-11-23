@@ -45,6 +45,15 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   L'interruttore è nel **gestionale → Notifiche push → "Invio notifiche attivo"** (`notifiche.attive` nel
   documento del negozio): l'app lo legge da Firebase, quindi si accendono **senza aggiornare l'app**.
   Accenderlo solo dopo aver installato il programma (piano Blaze). Su iPhone serve anche la chiave APNs in Firebase.
+- **Testi legali e ruoli**: nell'app il **salone** è il **Titolare** dei dati dei clienti ({{ragione}}, {{piva}}…
+  dal gestionale → Negozio); **Eurogestion** è **sviluppatore** dell'app e **Responsabile del trattamento**
+  (`window.SVILUPPATORE` in `seed.js`, modificabile da `config.js → sviluppatore`; segnaposto `{{svil_nome}}`,
+  `{{svil_piva}}`, `{{svil_sede}}`, `{{svil_email}}`). `nomina-responsabile.html` (nella cartella principale) è
+  l'accordo art. 28 GDPR da stampare e far firmare al salone; il gestionale (Negozio → Testi legali) mostra il
+  riquadro con il link e avvisa se i testi sono stati personalizzati e non nominano lo sviluppatore.
+  Documenti per i saloni e privacy della piattaforma sono sul sito eurogestionradix.it (repository
+  `Radixsalon-sito`: `condizioni.html`, `privacy.html`). **Sono bozze di partenza: farli rivedere da un professionista.**
+  Servono anche una dichiarazione di autorizzazione firmata dal salone (pubblicazione negli store a nome suo).
 - Il pacchetto Java interno è fisso (`app.stampo`, namespace in `build.gradle`): l'identificativo vero
   negli store è `applicationId`, che arriva da `config.js`. Non rinominare le cartelle Java.
 

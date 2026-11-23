@@ -30,6 +30,10 @@ window.APP = {
   /* Marchio della schermata iniziale: 'semplice' (solo la scritta) oppure 'radici' (le radici crescono dalle lettere) */
   marchio: 'semplice',
 
+  /* Chi sviluppa e fornisce l'app. Compare nei testi legali come "sviluppatore" e "responsabile del trattamento".
+     Di solito resta quello di Eurogestion: togli il commento solo se l'app è fornita da un'altra società. */
+  // sviluppatore: { nome: 'Nome società', piva: '00000000000', sede: 'Via ..., CAP Città (XX)', email: 'info@esempio.it', sito: 'https://esempio.it' },
+
   /* Repository GitHub dell'app (proprietario/nome): da qui l'APK scarica gli aggiornamenti */
   repository: 'App-modello/App-stampo',
   /* Indirizzo del sito pubblicato (GitHub Pages), con la barra finale: serve per i link a privacy e termini */
