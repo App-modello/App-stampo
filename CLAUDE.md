@@ -45,14 +45,17 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   L'interruttore è nel **gestionale → Notifiche push → "Invio notifiche attivo"** (`notifiche.attive` nel
   documento del negozio): l'app lo legge da Firebase, quindi si accendono **senza aggiornare l'app**.
   Accenderlo solo dopo aver installato il programma (piano Blaze). Su iPhone serve anche la chiave APNs in Firebase.
-- **Testi legali e ruoli**: nell'app il **salone** è il **Titolare** dei dati dei clienti ({{ragione}}, {{piva}}…
-  dal gestionale → Negozio); **Eurogestion** è **sviluppatore** dell'app e **Responsabile del trattamento**
+- **Testi legali e ruoli**: nei testi per i clienti il **Titolare** del trattamento è **Eurogestion**
   (`window.SVILUPPATORE` in `seed.js`, modificabile da `config.js → sviluppatore`; segnaposto `{{svil_nome}}`,
-  `{{svil_piva}}`, `{{svil_sede}}`, `{{svil_email}}`). le regole dell'art. 28 GDPR (Eurogestion responsabile del trattamento) stanno nelle condizioni del servizio sul sito, sezione 5: non c'è un documento da firmare a parte. Il gestionale (Negozio → Testi legali) mostra
-  il riquadro con il link alle condizioni e avvisa se i testi sono stati personalizzati e non nominano lo sviluppatore.
-  Documenti per i saloni e privacy della piattaforma sono sul sito eurogestionradix.it (repository
-  `Radixsalon-sito`: `condizioni.html`, `privacy.html`). **Sono bozze di partenza: farli rivedere da un professionista.**
-  L'Ordine deve prevedere l'autorizzazione del salone alla pubblicazione negli store a suo nome e l'approvazione specifica delle clausole (art. 10 delle condizioni).
+  `{{svil_piva}}`, `{{svil_sede}}`, `{{svil_email}}`). Il **salone** compare col nome (`{{nome}}`) come attività
+  presso cui si prenota e **destinatario** dei dati, titolare autonomo per i propri appuntamenti e clienti: per questo
+  non serve compilare ragione sociale e P.IVA del salone (bastano nome, telefono, email, indirizzo).
+  Le regole tra Eurogestion e il salone stanno nelle condizioni del servizio sul sito (sezione 5), accettate con
+  l'Ordine. Il gestionale (Negozio → Testi legali) mostra un riquadro con il link e avvisa se i testi sono stati
+  personalizzati e non nominano Eurogestion come titolare. Documenti e privacy della piattaforma sono sul sito
+  eurogestionradix.it (repository `Radixsalon-sito`: `condizioni.html`, `privacy.html`). **Sono bozze di partenza:
+  farli rivedere da un professionista**, in particolare l'assetto titolare/destinatario. L'Ordine deve prevedere
+  l'autorizzazione del salone alla pubblicazione negli store a suo nome e l'approvazione specifica delle clausole.
 - **Pagine legali per gli store**: lo sviluppatore negli store è Eurogestion, quindi per Google Play e App Store
   l'indirizzo di privacy, termini e cancellazione account è una pagina sul sito di Eurogestion che indica
   Eurogestion come sviluppatore: `https://eurogestionradix.it/app/<nome>/privacy.html`. Si crea dal repository
