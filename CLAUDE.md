@@ -68,16 +68,19 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   termini.html, cancella-account.html, seed.js, config.js e le adatta; leggono gli stessi dati Firestore dell'app,
   quindi i testi si aggiornano da soli; rigenerare se cambiano seed.js o le pagine dell'app). Poi impostare
   `sitoStore` in `config.js` con quell'indirizzo base (lo usano il gestionale e i tasti "Apri la versione web" dell'app) e pubblicare il sito (`main`). Il link dipende dal dominio
-  eurogestionradix.it: rinnovo automatico acceso.
+  eurogestionradix.it: rinnovo automatico acceso. Su Google Play il nome sviluppatore è **Master.app** (nome commerciale di
+  Eurogestion): le pagine lo dicono nel riquadro e in fondo, per collegare il nome della scheda alla società dei testi
+  (Google vuole che la privacy nomini lo sviluppatore della scheda). Se il nome sviluppatore diventa "Eurogestion", togliere
+  la riga in `crea-pagina-app.py` e rigenerare le pagine.
 - Il pacchetto Java interno è fisso (`app.stampo`, namespace in `build.gradle`): l'identificativo vero
   negli store è `applicationId`, che arriva da `config.js`. Non rinominare le cartelle Java.
 
 ## Fabbriche (GitHub Actions)
 | Fabbrica | File | Cosa fa |
 |---|---|---|
-| App Android | `android.yml` | APK (con aggiornamento automatico) + AAB per Google Play. Alla prima compilazione da `main` crea la chiave di firma (come Radici); senza password firma di prova. Pubblica in Releases solo da `main` con firma vera. |
+| App Android | `android.yml` | APK (con aggiornamento automatico) + AAB per Google Play. Controllo severo sull'AAB: nel manifest della versione store non deve esserci `REQUEST_INSTALL_PACKAGES` né la parola "fileprovider" (nemmeno nei commenti del manifest) né `AggiornaPlugin`. Alla prima compilazione da `main` crea la chiave di firma (come Radici); senza password firma di prova. Pubblica in Releases solo da `main` con firma vera. |
 | App iPhone | `ios.yml` | Compilazione di verifica non firmata; con i 4 segreti Apple e dal ramo `main` firma e carica su TestFlight. |
-| Google Play | `google-play.yml` | Manuale: `stato`, `carica-test-interno`, `promuovi-produzione`. |
+| Google Play | `google-play.yml` | Manuale: `stato`, `carica-test-interno`, `promuovi-produzione`. Se Google non permette l'invio automatico in revisione (modifiche in sospeso in Play Console, es. dopo un ripristino) salva senza inviare: poi in Play Console → Panoramica della pubblicazione → "Invia per la revisione". |
 | Verifica segreti | `verifica-segreti.yml` | Controlla che i segreti ci siano e siano validi, senza cambiare nulla. |
 | Notifiche Firebase | `notifiche-firebase.yml` | `prova` (automatica quando cambia `functions/`, non installa nulla) e `installa` (solo a mano, solo da `main`, solo su richiesta del titolare): installa il programma delle notifiche sul progetto Firebase di `config.js`. |
 | Verifica Firebase | `verifica-firebase.yml` | Controlla la chiave `FIREBASE_SERVICE_ACCOUNT_JSON` e i suoi permessi, senza cambiare nulla. |
