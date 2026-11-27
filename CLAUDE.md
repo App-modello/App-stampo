@@ -45,6 +45,11 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   L'interruttore è nel **gestionale → Notifiche push → "Invio notifiche attivo"** (`notifiche.attive` nel
   documento del negozio): l'app lo legge da Firebase, quindi si accendono **senza aggiornare l'app**.
   Accenderlo solo dopo aver installato il programma (piano Blaze). Su iPhone serve anche la chiave APNs in Firebase.
+- **Promemoria gratuiti sul telefono** (senza server, senza piano Blaze): finché "Invio notifiche attivo" è spento, l'app Android/iPhone programma
+  da sola i promemoria degli appuntamenti del cliente (plugin `@capacitor/local-notifications`, stessi orari/testi/silenzio del gestionale). Si riallineano
+  a ogni apertura dell'app: uno spostamento o annullo fatto dal gestionale lo vedono solo allora. Quando si accendono le notifiche del server si
+  spengono da soli (niente doppioni). Non ci sono comunicazioni, punti Fidelity né clienti inattivi: servono il server. Il permesso "allarmi esatti"
+  è tolto dal manifest (Google Play lo vuole dichiarato): i promemoria hanno qualche minuto di tolleranza. Serve un aggiornamento dell'app.
 - **Testi legali e ruoli**: nei testi per i clienti il **Titolare** del trattamento è **Eurogestion**
   (`window.SVILUPPATORE` in `seed.js`, modificabile da `config.js → sviluppatore`; segnaposto `{{svil_nome}}`,
   `{{svil_piva}}`, `{{svil_sede}}`, `{{svil_email}}`). Il **salone** compare col nome (`{{nome}}`) come attività
