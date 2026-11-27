@@ -52,6 +52,9 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   a ogni apertura dell'app: uno spostamento o annullo fatto dal gestionale lo vedono solo allora. Quando si accendono le notifiche del server si
   spengono da soli (niente doppioni). Non ci sono comunicazioni, punti Fidelity né clienti inattivi: servono il server. Il permesso "allarmi esatti"
   è tolto dal manifest (Google Play lo vuole dichiarato): i promemoria hanno qualche minuto di tolleranza. Serve un aggiornamento dell'app.
+  Per questo in Impostazioni → "Sveglie e promemoria" l'interruttore dell'app è grigio: è normale. Ogni notifica locale deve avere
+  `isExactNotification: false` (altrimenti il plugin apre quella schermata a ogni prenotazione/apertura) e `allowWhileIdle: true`
+  (altrimenti col telefono a riposo il promemoria arriva in ritardo). Corretto in Radici con la versione 1.54.
 - **Pannello Eurogestion e sospensione** (repository `Eurogestion-panello/Eurogestion-panellodicontrollo`): un'unica pagina con tutti i
   saloni. Per ogni nuova app: nel suo progetto Firebase creare l'utente Eurogestion (stessa email e password), i documenti
   `saloni/<salone>/admin/<UID>` e `saloni/<salone>/eurogestion/<UID>`, aggiungere il dominio del pannello ai Domini autorizzati
@@ -124,6 +127,13 @@ con lo stesso nome prevale su quello dell'organizzazione). `FIRMA_PASSWORD` rest
 9. Notifiche (quando le vuole il titolare): piano Blaze sul progetto Firebase con avviso di spesa, segreto
    `FIREBASE_SERVICE_ACCOUNT_JSON`, fabbrica "Notifiche Firebase" → `installa` (da `main`), poi nel gestionale
    accendere "Invio notifiche attivo". Per gli iPhone: chiave APNs in Firebase → Cloud Messaging.
+
+## Decisioni prese (valgono per tutte le app)
+- **Avvisi R8 di Play Console** (percentuali di ottimizzazione basse, "riduzione delle risorse non abilitata"): sono solo consigli,
+  si lasciano così. Le regole larghe in `proguard-rules.pro` proteggono Capacitor, Firebase e i plugin (cercati per nome). Se un giorno
+  si attiva `shrinkResources`, proteggere `@drawable/ic_notifica` con un `keep.xml` (la usa solo il JavaScript).
+- **"Esegui l'upgrade del plug-in Android per Gradle alla 9.0"**: si resta sulla 8.13 finché Capacitor non supporta ufficialmente la 9;
+  allora si aggiorna in una release a parte seguendo la guida di Capacitor. Le app vanno comunque aggiornate almeno ogni 6 mesi.
 
 ## Stato (aggiornare quando cambia)
 - Stampo: pubblicato su `main`.
