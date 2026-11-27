@@ -114,7 +114,7 @@ jobs:
           m=$(find intermediates -path '*storeRelease*' -name AndroidManifest.xml | grep -i merged | head -1)
           echo "Manifest controllato: $m"
           test -n "$m"
-          if grep -q REQUEST_INSTALL_PACKAGES "$m" || grep -q "androidx.core.content.FileProvider" "$m"; then echo "ERRORE: la versione store contiene l'aggiornamento automatico"; exit 1; fi
+          if grep -q REQUEST_INSTALL_PACKAGES "$m" || grep -qi fileprovider "$m"; then echo "ERRORE: la versione store contiene l'aggiornamento automatico"; exit 1; fi
           if unzip -p "$GITHUB_WORKSPACE/app-store.aab" 'base/dex/*.dex' | grep -a -q 'Lapp/stampo/AggiornaPlugin;'; then echo "ERRORE: AggiornaPlugin nella versione store"; exit 1; fi
           unzip -p "$GITHUB_WORKSPACE/$APK" '*.dex' | grep -a -q 'Lapp/stampo/AggiornaPlugin;' || { echo "ERRORE: manca AggiornaPlugin nell'APK di GitHub"; exit 1; }
           echo "OK: niente permesso di installazione, niente FileProvider, niente AggiornaPlugin"
