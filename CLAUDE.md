@@ -50,6 +50,11 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   a ogni apertura dell'app: uno spostamento o annullo fatto dal gestionale lo vedono solo allora. Quando si accendono le notifiche del server si
   spengono da soli (niente doppioni). Non ci sono comunicazioni, punti Fidelity né clienti inattivi: servono il server. Il permesso "allarmi esatti"
   è tolto dal manifest (Google Play lo vuole dichiarato): i promemoria hanno qualche minuto di tolleranza. Serve un aggiornamento dell'app.
+- **Pannello Eurogestion e sospensione** (repository `Eurogestion-panello/Eurogestion-panellodicontrollo`): un'unica pagina con tutti i
+  saloni. Per ogni nuova app: nel suo progetto Firebase creare l'utente Eurogestion (stessa email e password), i documenti
+  `saloni/<salone>/admin/<UID>` e `saloni/<salone>/eurogestion/<UID>`, aggiungere il dominio del pannello ai Domini autorizzati
+  e il salone in `config.js` del pannello. "Sospendi servizio" scrive `saloni/<salone>/servizio/stato` (`attivo: false`): si ferma
+  SOLO il gestionale (schermata "Servizio sospeso"); le regole impediscono al titolare di modificare dati; l'app dei clienti non cambia.
 - **Testi legali e ruoli**: nei testi per i clienti il **Titolare** del trattamento è **Eurogestion**
   (`window.SVILUPPATORE` in `seed.js`, modificabile da `config.js → sviluppatore`; segnaposto `{{svil_nome}}`,
   `{{svil_piva}}`, `{{svil_sede}}`, `{{svil_email}}`). Il **salone** compare col nome (`{{nome}}`) come attività
