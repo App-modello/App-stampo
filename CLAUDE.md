@@ -55,6 +55,10 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   `saloni/<salone>/admin/<UID>` e `saloni/<salone>/eurogestion/<UID>`, aggiungere il dominio del pannello ai Domini autorizzati
   e il salone in `config.js` del pannello. "Sospendi servizio" scrive `saloni/<salone>/servizio/stato` (`attivo: false`): si ferma
   SOLO il gestionale (schermata "Servizio sospeso"); le regole impediscono al titolare di modificare dati; l'app dei clienti non cambia.
+  Abbonamenti: registro nel progetto Firebase di Eurogestion (`eurogestion-panello`, raccolta `abbonamenti`, piani mensile/semestrale/annuale
+  come sul sito: 41,67/250/500 € + IVA); il pannello ne copia una sintesi in `saloni/<salone>/servizio/abbonamento`, che il gestionale mostra
+  nella sezione "Abbonamento" (avviso a 7 giorni dalla scadenza). Novità: raccolta `novita` del progetto Eurogestion (lettura pubblica),
+  scritte dal pannello e mostrate nella sezione "Novità" di tutti i gestionali. Guida completa: `GUIDA.md` nel repository del pannello.
 - **Testi legali e ruoli**: nei testi per i clienti il **Titolare** del trattamento è **Eurogestion**
   (`window.SVILUPPATORE` in `seed.js`, modificabile da `config.js → sviluppatore`; segnaposto `{{svil_nome}}`,
   `{{svil_piva}}`, `{{svil_sede}}`, `{{svil_email}}`). Il **salone** compare col nome (`{{nome}}`) come attività
