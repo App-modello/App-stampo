@@ -12,6 +12,8 @@ Questo repository è lo **stampo** da cui nascono le app di prenotazione per neg
   `carica-test-interno` e `promuovi-produzione` **solo se lo chiede lui**.
 - Non mettere mai segreti, password o chiavi nel repository (è pubblico).
 - Se non fa niente, prima chiedi: spesso vuole solo informazioni ("rispondimi solo, non fare nulla").
+- **Gestionale e app dei saloni li leggono i clienti di Eurogestion**: niente testi interni (spiegazioni per il titolare di
+  Eurogestion, note su pagamenti, store, ruoli, "non da questo gestionale"…). Queste cose vanno solo nel pannello o nelle guide.
 
 ## Com'è fatto
 Un solo repository per negozio, con app dei clienti e gestionale del titolare (Radici invece ne ha due:
@@ -65,8 +67,7 @@ Un solo repository per negozio, con app dei clienti e gestionale del titolare (R
   presso cui si prenota e **destinatario** dei dati, titolare autonomo per i propri appuntamenti e clienti: per questo
   non serve compilare ragione sociale e P.IVA del salone (bastano nome, telefono, email, indirizzo).
   Le regole tra Eurogestion e il salone stanno nelle condizioni del servizio sul sito (sezione 5), accettate con
-  l'Ordine. Il gestionale (Negozio → Testi legali) mostra un riquadro con il link e avvisa se i testi sono stati
-  personalizzati e non nominano Eurogestion come titolare. Documenti e privacy della piattaforma sono sul sito
+  l'Ordine. Documenti e privacy della piattaforma sono sul sito
   eurogestionradix.it (repository `Radixsalon-sito`: `condizioni.html`, `privacy.html`). **Sono bozze di partenza:
   farli rivedere da un professionista**, in particolare l'assetto titolare/destinatario. L'Ordine deve prevedere
   l'autorizzazione del salone alla pubblicazione negli store a suo nome e l'approvazione specifica delle clausole.
